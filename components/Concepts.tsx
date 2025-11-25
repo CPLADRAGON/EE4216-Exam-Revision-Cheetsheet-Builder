@@ -161,6 +161,43 @@ void loop() {
 }`
   },
   {
+    id: 'ultrasonic',
+    title: 'HC-SR04 Ultrasonic Sensor',
+    category: 'Hardware',
+    definition: 'Measures distance by emitting an ultrasonic pulse and timing the echo.',
+    keyPoints: [
+      'Trigger: Send a 10µs HIGH pulse to TRIG pin.',
+      'Echo: Measure duration of HIGH pulse on ECHO pin.',
+      'Logic: 5V logic. Echo pin might need voltage divider (5V->3.3V) for ESP32 safety.'
+    ],
+    codeSnippet: `digitalWrite(trigPin, LOW);
+delayMicroseconds(2);
+digitalWrite(trigPin, HIGH);
+delayMicroseconds(10);
+digitalWrite(trigPin, LOW);
+
+long duration = pulseIn(echoPin, HIGH);
+float distCm = duration * 0.034 / 2;`
+  },
+  {
+    id: 'ldr',
+    title: 'Light Dependent Resistor (LDR)',
+    category: 'Hardware',
+    definition: 'A resistor whose resistance decreases as light intensity increases.',
+    keyPoints: [
+      'Circuit: Requires a voltage divider circuit with a fixed resistor (e.g., 10kΩ).',
+      'Reading: Use `analogRead()` to measure voltage at the midpoint.',
+      'Inverse: High light = Low Resistance = High/Low Voltage (depends on wiring).'
+    ],
+    codeSnippet: `int val = analogRead(LDR_PIN); // 0-4095
+// Invert if needed: 4095 - val
+if (val < 1000) {
+  Serial.println("It is bright!");
+} else {
+  Serial.println("It is dark.");
+}`
+  },
+  {
     id: 'neopixel',
     title: 'NeoPixel (WS2812B) RGB LEDs',
     category: 'Hardware',
@@ -222,6 +259,27 @@ void IRAM_ATTR isr() {
 void setup() {
   pinMode(0, INPUT_PULLUP);
   attachInterrupt(0, isr, FALLING);
+}`
+  },
+  {
+    id: 'i2c',
+    title: 'I2C (Inter-Integrated Circuit)',
+    category: 'Hardware',
+    definition: 'A synchronous, multi-master, multi-slave, packet switched, single-ended, serial computer bus.',
+    keyPoints: [
+      '2 Wires: SDA (Data) and SCL (Clock).',
+      'Addressing: Master communicates with Slaves via 7-bit addresses.',
+      'Pull-ups: Requires pull-up resistors on both lines.',
+      'Libraries: Usually handled via `Wire.h`.'
+    ],
+    codeSnippet: `Wire.begin(); // Master mode
+Wire.beginTransmission(0x68); // Device Address
+Wire.write(0x00); // Register to read
+Wire.endTransmission();
+
+Wire.requestFrom(0x68, 1); // Request 1 byte
+if (Wire.available()) {
+  byte val = Wire.read();
 }`
   },
   // --- POWER ---
@@ -295,7 +353,7 @@ const Concepts: React.FC<ConceptsProps> = ({ changeView }) => {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
             <input 
               type="text" 
-              placeholder="Search concepts (e.g., 'mutex', 'dht')..."
+              placeholder="Search concepts (e.g., 'mutex', 'mqtt')..."
               className="w-full pl-10 pr-4 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-nus-blue focus:border-transparent outline-none"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
